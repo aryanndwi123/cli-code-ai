@@ -14,7 +14,7 @@ class AuthClient:
    
     
     def __init__(self):
-        self.api_url = os.getenv('API_BASE_URL', 'http://localhost:5000/api')
+        self.api_url = os.getenv('API_BASE_URL', 'https://cli-code-ai.vercel.app/api')
         self.token_file = os.getenv('TOKEN_FILE', '.auth_token')
         self.session = requests.Session()
         # Load existing token if available

@@ -298,8 +298,8 @@ if __name__ == '__main__':
     # Initialize database
     try:
         init_db()
-        print("📡 Server starting on http://localhost:5000")
-        print("📊 Health check: http://localhost:5000/health")
+        print("📡 Server starting on https://cli-code-ai.vercel.app")
+        print("📊 Health check: https://cli-code-ai.vercel.app/health")
         
         # Run development server
         app.run(debug=True, host='0.0.0.0', port=5000)

@@ -9,7 +9,6 @@ auth = AuthClient()
 @click.group()
 @click.version_option(version="1.0.0")
 def cli():
-  
     pass
 
 @cli.command()
@@ -104,6 +103,19 @@ def protected():
     
     click.echo(click.style(f"🔒 Welcome to protected area, {data['email']}!", fg="green"))
     click.echo("🎉 You have access to premium features!")
+    
+@cli.command()
+def server_conn():
+    """Is server running """
+    success, data = auth.get_profile()
+    if not success:
+        click.echo(click.style(" Please sign in first", fg="red"))
+        click.echo("Run: basault signin")
+        return
+    
+    click.echo(click.style(f"🔒 Welcome to protected area, {data['email']}!", fg="green"))
+    click.echo("🎉 You have access to premium features!")
+
 
 @cli.command()
 @click.option('--url', help='Set API URL')
