@@ -5,6 +5,7 @@ import psycopg2.extras
 import hashlib
 import jwt
 import os
+import ssl
 from datetime import datetime, timedelta
 from functools import wraps
 from urllib.parse import urlparse
@@ -24,14 +25,32 @@ def get_db():
         # Parse the database URL
         url = urlparse(DATABASE_URL)
         
-        conn = psycopg2.connect(
-            host=url.hostname,
-            port=url.port or 5432,
-            database=url.path[1:],  # Remove the leading '/'
-            user=url.username,
-            password=url.password,
-            sslmode='require'  # Required for most hosted PostgreSQL
-        )
+        conn_params = {
+            'host': url.hostname,
+            'port': url.port or 5432,
+            'database': url.path[1:], 
+            'user': url.username,
+            'password': url.password,
+            'sslmode': 'require',
+            'sslcert': None,
+            'sslkey': None,
+            'sslrootcert': None,
+            'connect_timeout': 10,
+            'options': '-c default_transaction_isolation=read_committed'
+        }
+        if hasattr(ssl, 'create_default_context'):
+            conn_params['sslcontext'] = ssl.create_default_context()
+        
+        print(f"Connecting to database: {url.hostname}:{url.port}")
+        conn = psycopg2.connect(**conn_params)
+        
+        # Test the connection
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1')
+        cursor.fetchone()
+        cursor.close()
+        
+        print("Database connection successful")
         return conn
     except Exception as e:
         print(f"Database connection failed: {e}")
@@ -64,8 +83,21 @@ def init_db():
         
         print("Database initialized successfully")
         
+    except psycopg2.OperationalError as e:
+        error_msg = str(e)
+        print(f"Database connection failed: {error_msg}")
+        
+        # Provide specific error guidance
+        if "Network is unreachable" in error_msg:
+            print("This is likely an IPv6/network connectivity issue between Render and Supabase")
+            print("Possible solutions:")
+            print("1. Check Supabase network settings")
+            print("2. Verify database URL is correct")
+            print("3. Try alternative connection methods")
+        
+        raise
     except Exception as e:
-        print(f"Database initialization failed: {e}")
+        print(f"Unexpected database error: {e}")
         raise
 
 def hash_password(password):
