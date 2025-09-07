@@ -28,19 +28,12 @@ def get_db():
         conn_params = {
             'host': url.hostname,
             'port': url.port or 5432,
-            'database': url.path[1:], 
+            'database': url.path[1:],  # Remove the leading '/'
             'user': url.username,
             'password': url.password,
             'sslmode': 'require',
-            'sslcert': None,
-            'sslkey': None,
-            'sslrootcert': None,
-            'connect_timeout': 10,
-            'options': '-c default_transaction_isolation=read_committed'
+            'connect_timeout': 10
         }
-        if hasattr(ssl, 'create_default_context'):
-            conn_params['sslcontext'] = ssl.create_default_context()
-        
         print(f"Connecting to database: {url.hostname}:{url.port}")
         conn = psycopg2.connect(**conn_params)
         
@@ -52,8 +45,12 @@ def get_db():
         
         print("Database connection successful")
         return conn
-    except Exception as e:
+        
+    except psycopg2.OperationalError as e:
         print(f"Database connection failed: {e}")
+        raise
+    except Exception as e:
+        print(f"Unexpected database error: {e}")
         raise
 
 def init_db():
