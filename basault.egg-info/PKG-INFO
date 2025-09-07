@@ -4,10 +4,10 @@ Version: 1.0.0
 Summary: AI CLI
 Home-page: https://github.com/aryanndwi123/basault
 Author: Aryann Dwivedi
-Author-email: Aryann Dwivedi <aryanndwivedi2403@gmail.com>
+Author-email: Aryann <aryanndwivedi2403@gmail.com>
 License: MIT
-Project-URL: Homepage, https://github.com/aryanndwi123/basault
-Project-URL: Bug Reports, https://github.com/aryanndwi123/basault/issues
+Project-URL: Homepage, https://github.com/yourusername/basault
+Project-URL: Bug Reports, https://github.com/yourusername/basault/issues
 Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: MIT License

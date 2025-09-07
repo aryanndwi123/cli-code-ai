@@ -291,20 +291,20 @@ def health():
             'timestamp': datetime.utcnow().isoformat()
         }), 503
 
+# Add this to the bottom of your auth_server.py
 if __name__ == '__main__':
-    print("🐘 Starting PostgreSQL Authentication Server...")
-    print(f"🔗 Database: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'localhost'}")
+    # Render sets the PORT environment variable
+    port = int(os.environ.get('PORT', 5000))
     
-    # Initialize database
+    print(f"Starting server on port {port}")
+    print(f"Database: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'localhost'}")
+    
     try:
         init_db()
-        print("📡 Server starting on https://cli-code-ai.vercel.app")
-        print("📊 Health check: https://cli-code-ai.vercel.app/health")
+        print("Database initialized successfully")
         
-        # Run development server
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        # Render requires host='0.0.0.0' and debug=False for production
+        app.run(debug=False, host='0.0.0.0', port=port)
         
     except Exception as e:
         print(f"Failed to start server: {e}")
-        print("\nCheck your DATABASE_URL environment variable")
-        print("Make sure your PostgreSQL database is accessible")
