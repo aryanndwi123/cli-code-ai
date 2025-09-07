@@ -9,11 +9,7 @@ auth = AuthClient()
 @click.group()
 @click.version_option(version="1.0.0")
 def cli():
-    """
-    basault: Simple CLI Authentication Tool
-    
-    A simple and secure CLI tool for user authentication.
-    """
+  
     pass
 
 @cli.command()
@@ -23,17 +19,17 @@ def signup():
     
     email = click.prompt("Email", type=str).strip()
     if not email:
-        click.echo(click.style("❌ Email cannot be empty", fg="red"))
+        click.echo(click.style(" Email cannot be empty", fg="red"))
         return
     
     password = getpass.getpass("Password: ")
     if not password:
-        click.echo(click.style("❌ Password cannot be empty", fg="red"))
+        click.echo(click.style(" Password cannot be empty", fg="red"))
         return
     
     confirm_password = getpass.getpass("Confirm Password: ")
     if password != confirm_password:
-        click.echo(click.style("❌ Passwords don't match", fg="red"))
+        click.echo(click.style(" Passwords don't match", fg="red"))
         return
     
     with click.progressbar([1], label="Creating account") as bar:
@@ -41,9 +37,9 @@ def signup():
             success, message = auth.signup(email, password)
     
     if success:
-        click.echo(click.style(f"✅ {message}", fg="green"))
+        click.echo(click.style(f" {message}", fg="green"))
     else:
-        click.echo(click.style(f"❌ {message}", fg="red"))
+        click.echo(click.style(f" {message}", fg="red"))
 
 @cli.command()
 def signin():
@@ -54,17 +50,17 @@ def signin():
     if auth.is_logged_in():
         success, profile = auth.get_profile()
         if success:
-            click.echo(click.style(f"✅ Already logged in as {profile['email']}", fg="green"))
+            click.echo(click.style(f" Already logged in as {profile['email']}", fg="green"))
             return
     
     email = click.prompt("Email", type=str).strip()
     if not email:
-        click.echo(click.style("❌ Email cannot be empty", fg="red"))
+        click.echo(click.style(" Email cannot be empty", fg="red"))
         return
     
     password = getpass.getpass("Password: ")
     if not password:
-        click.echo(click.style("❌ Password cannot be empty", fg="red"))
+        click.echo(click.style(" Password cannot be empty", fg="red"))
         return
     
     with click.progressbar([1], label="Signing in") as bar:
@@ -72,9 +68,9 @@ def signin():
             success, message = auth.signin(email, password)
     
     if success:
-        click.echo(click.style(f"✅ {message}", fg="green"))
+        click.echo(click.style(f" {message}", fg="green"))
     else:
-        click.echo(click.style(f"❌ {message}", fg="red"))
+        click.echo(click.style(f" {message}", fg="red"))
 
 @cli.command()
 def logout():
@@ -83,26 +79,26 @@ def logout():
     
     success, message = auth.logout()
     if success:
-        click.echo(click.style(f"✅ {message}", fg="green"))
+        click.echo(click.style(f" {message}", fg="green"))
     else:
-        click.echo(click.style(f"❌ {message}", fg="red"))
+        click.echo(click.style(f" {message}", fg="red"))
 
 @cli.command()
 def status():
     """Check login status"""
     success, data = auth.get_profile()
     if success:
-        click.echo(click.style(f"✅ Logged in as: {data['email']}", fg="green"))
-        click.echo(f"📅 Member since: {data['created_at']}")
+        click.echo(click.style(f" Logged in as: {data['email']}", fg="green"))
+        click.echo(f" Member since: {data['created_at']}")
     else:
-        click.echo(click.style(f"❌ Not logged in", fg="red"))
+        click.echo(click.style(f" Not logged in", fg="red"))
 
 @cli.command()
 def protected():
     """Example protected command"""
     success, data = auth.get_profile()
     if not success:
-        click.echo(click.style("❌ Please sign in first", fg="red"))
+        click.echo(click.style(" Please sign in first", fg="red"))
         click.echo("Run: basault signin")
         return
     
@@ -115,7 +111,7 @@ def config(url):
     """Configure basault settings"""
     if url:
         Config.set_api_url(url)
-        click.echo(click.style(f"✅ API URL set to: {url}", fg="green"))
+        click.echo(click.style(f" API URL set to: {url}", fg="green"))
     else:
         current_url = Config.get_api_url()
         click.echo(f"Current API URL: {current_url}")

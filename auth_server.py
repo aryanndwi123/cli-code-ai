@@ -1,8 +1,3 @@
-# auth_server_postgresql.py - PostgreSQL Version
-"""
-Simple Authentication Server with PostgreSQL
-Works with hosted databases like Supabase, Railway, Heroku Postgres, etc.
-"""
 
 from flask import Flask, request, jsonify
 import psycopg2

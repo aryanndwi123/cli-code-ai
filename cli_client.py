@@ -1,9 +1,4 @@
-# cli_client.py - Simple CLI Client
-#!/usr/bin/env python3
-"""
-Simple CLI Authentication Client
-Connects to API server with database storage
-"""
+
 
 import requests
 import json
@@ -16,7 +11,7 @@ from datetime import datetime
 
 
 class AuthClient:
-    """Simple API-based authentication client"""
+   
     
     def __init__(self):
         self.api_url = os.getenv('API_BASE_URL', 'http://localhost:5000/api')
@@ -149,7 +144,7 @@ auth = AuthClient()
 
 @click.group()
 def cli():
-    """Simple CLI Authentication with API"""
+    
     pass
 
 @cli.command()
@@ -225,10 +220,10 @@ def status():
     print("⏳ Checking status...")
     success, data = auth.get_profile()
     if success:
-        print(f"✅ Logged in as: {data['email']}")
-        print(f"📅 Member since: {data['created_at']}")
+        print(f" Logged in as: {data['email']}")
+        print(f" Member since: {data['created_at']}")
     else:
-        print(f"❌ Not logged in ({data})")
+        print(f" Not logged in ({data})")
 
 @cli.command()
 def protected():
@@ -236,7 +231,7 @@ def protected():
     print("⏳ Checking authentication...")
     success, data = auth.get_profile()
     if not success:
-        print("❌ Please sign in first")
+        print("basault Please sign in first")
         print("Run: python cli_client.py signin")
         return
     
