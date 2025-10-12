@@ -4,7 +4,7 @@ class Config:
     """Configuration settings for basault"""
     
     # API Configuration
-    API_BASE_URL = os.getenv('BASAULT_API_URL', 'https://cli-code-ai.vercel.app/api')
+    API_BASE_URL = os.getenv('BASAULT_API_URL', 'http://localhost:5000/api')
     
     # File paths
     TOKEN_FILE = os.path.expanduser('~/.basault-token')  # Store in user's home directory
