@@ -16,6 +16,10 @@ export interface SignupCredentials extends LoginCredentials {
   username?: string;
 }
 
+export interface SignupFormData extends SignupCredentials {
+  confirmPassword: string;
+}
+
 export interface AuthToken {
   access_token: string;
   token_type: string;

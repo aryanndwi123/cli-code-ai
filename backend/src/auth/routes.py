@@ -16,7 +16,7 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     """Register a new user"""
     try:
         db_user = auth_service.create_user(db, user)
-        return UserResponse.from_orm(db_user)
+        return UserResponse.model_validate(db_user)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

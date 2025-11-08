@@ -5,12 +5,12 @@ import chalk from 'chalk';
 import boxen from 'boxen';
 import inquirer from 'inquirer';
 import ora from 'ora';
-import { authClient } from './auth';
-import { LoginCredentials, SignupCredentials } from '@/types/auth';
+import { authClient } from './auth.js';
+import { LoginCredentials, SignupCredentials, SignupFormData } from '../types/auth.js';
 
 // CLI metadata
 const version = '1.0.0';
-const title = chalk.cyan.bold('Claude Code');
+const title = chalk.cyan.bold('klix Code');
 const subtitle = chalk.gray('AI-powered development assistant');
 
 // Welcome message
@@ -38,7 +38,7 @@ function showSuccess(message: string) {
 
 // Setup main program
 program
-  .name('claude-code')
+  .name('klix-code')
   .description('AI-powered development assistant')
   .version(version, '-v, --version', 'Display version number')
   .option('-q, --quiet', 'Suppress non-essential output')
@@ -58,7 +58,7 @@ authProgram
   .description('Create a new account')
   .action(async () => {
     try {
-      const answers = await inquirer.prompt<SignupCredentials>([
+      const answers = await inquirer.prompt<SignupFormData>([
         {
           type: 'input',
           name: 'email',
@@ -106,7 +106,7 @@ authProgram
         handleError(response.error);
       } else {
         showSuccess('Account created successfully!');
-        console.log(chalk.blue('💡 Run'), chalk.cyan('claude-code auth signin'), chalk.blue('to sign in'));
+        console.log(chalk.blue('💡 Run'), chalk.cyan('klix-code auth signin'), chalk.blue('to sign in'));
       }
     } catch (error: any) {
       handleError(error.message);
@@ -196,7 +196,7 @@ authProgram
       } else {
         spinner.stop();
         console.log(chalk.red('❌ Not signed in'));
-        console.log(chalk.blue('💡 Run'), chalk.cyan('claude-code auth signin'), chalk.blue('to sign in'));
+        console.log(chalk.blue('💡 Run'), chalk.cyan('klix-code auth signin'), chalk.blue('to sign in'));
       }
     } catch (error: any) {
       handleError(error.message);
@@ -261,13 +261,13 @@ program
 // Main chat command (placeholder)
 program
   .command('chat')
-  .description('Start an interactive chat session with Claude')
+  .description('Start an interactive chat session with klix')
   .action(async () => {
     if (!(await authClient.isAuthenticated())) {
-      handleError('Please sign in first with: claude-code auth signin');
+      handleError('Please sign in first with: klix-code auth signin');
     }
 
-    console.log(chalk.blue('🤖 Starting Claude Code chat session...'));
+    console.log(chalk.blue('🤖 Starting klix Code chat session...'));
     console.log(chalk.gray('(This feature is coming soon!)'));
   });
 

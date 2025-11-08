@@ -1,6 +1,6 @@
-# Claude Code - AI-Powered Development Assistant
+# klix Code - AI-Powered Development Assistant
 
-A hybrid TypeScript/Python CLI tool that provides AI-powered assistance for software development tasks, similar to Claude Code.
+A hybrid TypeScript/Python CLI tool that provides AI-powered assistance for software development tasks, similar to klix Code.
 
 ## Architecture
 
@@ -13,7 +13,7 @@ This project uses a hybrid architecture:
 ## Project Structure
 
 ```
-claude-code-ai/
+klix-code-ai/
 ├── backend/               # Python FastAPI backend
 │   ├── src/
 │   │   ├── auth/         # Authentication system
@@ -97,9 +97,9 @@ npm link
 
 4. **Use the CLI**:
 ```bash
-claude-code --help
-claude-code auth signup
-claude-code auth signin
+klix-code --help
+klix-code auth signup
+klix-code auth signin
 ```
 
 ## Usage
@@ -108,34 +108,34 @@ claude-code auth signin
 
 **Sign up for a new account**:
 ```bash
-claude-code auth signup
+klix-code auth signup
 ```
 
 **Sign in**:
 ```bash
-claude-code auth signin
+klix-code auth signin
 ```
 
 **Check status**:
 ```bash
-claude-code auth status
+klix-code auth status
 ```
 
 **Sign out**:
 ```bash
-claude-code auth logout
+klix-code auth logout
 ```
 
 ### Configuration
 
 **Set API URL**:
 ```bash
-claude-code config --set-api-url http://your-server.com/api
+klix-code config --set-api-url http://your-server.com/api
 ```
 
 **Show configuration**:
 ```bash
-claude-code config --show
+klix-code config --show
 ```
 
 ## Development

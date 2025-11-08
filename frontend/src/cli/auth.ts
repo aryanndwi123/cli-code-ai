@@ -2,18 +2,18 @@ import axios, { AxiosResponse } from 'axios';
 import keytar from 'keytar';
 import Conf from 'conf';
 import chalk from 'chalk';
-import { User, LoginCredentials, SignupCredentials, AuthToken, ApiResponse } from '@/types/auth';
+import { User, LoginCredentials, SignupCredentials, AuthToken, ApiResponse } from '../types/auth.js';
 
 export class AuthClient {
   private apiUrl: string;
   private config: Conf;
-  private readonly serviceName = 'claude-code-cli';
+  private readonly serviceName = 'klix-code-cli';
   private readonly tokenKey = 'auth-token';
 
   constructor(apiUrl: string = 'http://localhost:8000/api') {
     this.apiUrl = apiUrl;
     this.config = new Conf({
-      projectName: 'claude-code',
+      projectName: 'klix-code',
       configName: 'config'
     });
   }
@@ -95,7 +95,7 @@ export class AuthClient {
 
     if (response.data) {
       console.log(chalk.green('✅ Account created successfully'));
-      console.log(chalk.blue('💡 Please sign in to start using Claude Code'));
+      console.log(chalk.blue('💡 Please sign in to start using klix Code'));
     }
 
     return response;

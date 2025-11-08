@@ -8,8 +8,8 @@ from .auth.routes import router as auth_router
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Claude Code API",
-    description="Backend API for Claude Code - AI-powered development assistant",
+    title="klix Code API",
+    description="Backend API for klix Code - AI-powered development assistant",
     version="1.0.0",
     debug=settings.DEBUG
 )
@@ -28,14 +28,14 @@ app.add_middleware(
 async def startup_event():
     """Initialize database on startup"""
     init_db()
-    print("🚀 Claude Code API started successfully")
+    print("🚀 klix Code API started successfully")
 
 
 @app.get("/")
 async def root():
     """Health check endpoint"""
     return {
-        "message": "Claude Code API",
+        "message": "klix Code API",
         "version": "1.0.0",
         "status": "healthy"
     }
