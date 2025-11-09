@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     """Application settings"""
 
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./klix_code.db")
 
     # Security
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
@@ -37,7 +37,8 @@ class Settings(BaseSettings):
     REDIS_URL: Optional[str] = os.getenv("REDIS_URL")
 
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
+        extra = "ignore"
 
 
 # Global settings instance

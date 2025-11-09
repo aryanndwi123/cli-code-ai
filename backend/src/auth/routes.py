@@ -25,7 +25,11 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create user"
+            detail={
+                "message": "Failed to create user",
+                "error": str(e),
+                "type": type(e).__name__
+            }
         )
 
 
@@ -62,7 +66,6 @@ async def signin(user_login: UserLogin, db: Session = Depends(get_db)):
 async def logout(current_user: UserResponse = Depends(get_current_user)):
     """Logout user (client should discard token)"""
     # In a stateless JWT system, logout is handled client-side
-    # For additional security, you could maintain a blacklist of tokens
     return {"message": "Successfully logged out"}
 
 

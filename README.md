@@ -29,6 +29,45 @@ klix-code-ai/
 └── shared/              # Shared types and schemas
 ```
 
+
+```
+backend/
+├── agent/
+│   ├── orchestrator.py      # Main agent loop
+│   ├── planner.py           # Task decomposition
+│   ├── context_manager.py   # Context window management
+│   └── tool_executor.py     # Tool execution logic
+├── tools/
+│   ├── code_editor.py       # File read/write/edit
+│   ├── code_analyzer.py     # Tree-sitter, AST analysis
+│   ├── lsp_client.py        # LSP integration
+│   ├── shell_executor.py    # Run commands
+│   └── git_operations.py    # Git integration
+├── llm/
+│   ├── client.py            # Anthropic API client
+│   ├── prompt_builder.py    # System prompts, context
+│   └── streaming.py         # SSE handling
+└── state/
+    ├── session.py           # Session persistence
+    └── history.py           # Conversation history
+```
+
+```
+cli/
+├── commands/
+│   ├── init.ts              // Project initialization
+│   ├── chat.ts              // Interactive mode
+│   └── task.ts              // One-shot tasks
+├── ui/
+│   ├── renderer.ts          // Output formatting
+│   ├── progress.ts          // Progress indicators
+│   └── diff_viewer.ts       // Code diff display
+├── ipc/
+│   └── backend_client.ts    // Python backend communication
+└── config/
+    └── settings.ts          // User preferences
+```
+
 ## Features
 
 ### Authentication System
