@@ -16,6 +16,8 @@ from exceptions import (
     APICallError
 )
 
+import time
+
 
 
 
@@ -157,7 +159,109 @@ class Orchestrator:
             return self._create_timeout_result(str(e))
         
         except Exception as e:
+            logger.error(f"Error during execution: {e}", exc_info = True)
+            return self._create_error_result(e)
+        
+        finally:
+            self.is_running = False
+            execution_time = (datetime.now() - self.start_time).total_seconds()
+            logger.info(f"Execution completed in {execution_time:.2f}s")
+    
+    
+    def _call_llm(self) -> Message:
+        
+        tools = self.tool_executor.get_tool_schema()
+        
+        messages = self._build_api_message()
+        
+        for attempt in range(self.config.max_retries):
+            try: 
+                logger.debug(f"API call attempt {attempt + 1}/{self.config.max_retried}")
+                
+                
+                response = self.client.message.create(
+                    model = self.config.model,
+                    max_token = self.config.max_token,
+                    temperature = self.config.temperature,
+                    system = self.system_prompt,
+                    messages = messages,
+                    tools = tools
+                )
+                
+                logger.debug(f"API call successful Usage: {response.usage}")
+                return response
             
+            
+            except APIStatusError as e:
+                if e.status_code in [429,500,502,503,504]:
+                    if attempt < self.config.max_reties - 1:
+                        delay = self.config.retry_delay * (2 ** attempt)
+                        logger.warning(f"API error {e.status_code}, retrying in {delay}s ....")
+                        time.sleep(delay)
+                        continue
+                    
+                    
+                
+                logger.error(f"API status error: {e}")
+                raise APICallError(f"API call failed: {e}") from e
+            
+            except APIError as e:
+                logger.error(f"API error:{e}")
+                raise APICallError(f"API call failed: {e}") from e
+            
+            
+        raise APICallError(f"API call failed after {self.config.max_retires} retries")
+    
+    
+    def _execute_tools(self,tool_calls:List[Dict[str,Any]]) ->List[Dict[str,Any]]:
+        results = []
+        
+        for tool_call in tool_calls:
+            tool_name = tool_call["name"]
+            tool_input = tool_call["input"]
+            tool_id = tool_call["id"]
+            
+            logger.info(f"Executing tool: {tool_name}")
+            logger.debug(f"Tool input: {tool_input}")
+            
+            
+            try:
+                result = self.tool_executor.execute(tool_name,tool_input)
+                
+                
+                self.tools_called.append(tool_name)
+                
+                if "files_modified" in result:
+                    
+                    self.files_modified.extend(result["files_modified"])
+                    
+                tool_result = {
+                    "type": "tool_result",
+                    "tool_use_id": tool_id,
+                    "content": self._format_tool_result(result)
+                }
+                
+                logger.info(f"Tool {tool_name} Executed successfully")
+                
+            except Exception as e:
+                
+                logger.error(f"TOol {tool_name} failed: {e}")
+                self.errors.append(f"{tool_name}: {str(e)}")
+                
+                tool_result = {
+                    "type": "tool_result",
+                    "tool_use_id": tool_id,
+                    "content": f"Error: {str(e)}",
+                    "is_error":True
+                }
+                
+            results.append(tool_result)
+            
+        return results
+    
+                    
+                    
+        
                     
                 
     
