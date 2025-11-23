@@ -382,7 +382,48 @@ When you're done with the task, simply respond without calling any more tools.
             
             
         )   
+        
+    def _create_timeout_result(self, reason: str) -> ExecutionResult:
+        execution_time = (datetime.now() - self.start_time).total_seconds()
+        
+        return ExecutionResult(
+            success=False,
+            final_message=f"Task did not complete within {self.config.max_iterations} iterations. Reason: {reason}",
+            iterations_used=self.iteration_count,
+            tools_called=self.tools_called,
+            files_modified=list(set(self.files_modified)),
+            errors=self.errors + [reason],
+            execution_time=execution_time,
+            metadata={
+                "timeout": True,
+                "model": self.config.model
+            }
+        )
     
+    def _create_error_result(self,error:Exception) -> ExecutionResult:
+        execution_time = (datetime.now() - self.start_time).total_seconds()
+        
+        return ExecutionResult(
+            success=False,
+            final_message=f"Execution failed with error: {str(error)}",
+            iterations_used=self.iteration_count,
+            tools_called=self.tools_called,
+            files_modified=list(set(self.files_modified)),
+            errors=self.errors + [str(errors)],
+            execution_time=execution_time,
+            metadata={
+                "error_type":type(error).__name__,
+                "model":self.config.model
+            }
+        )
+        
+    def get_conversation_history(self) -> List[Dict[str,Any]]:
+        return self.message.copy()
+    
+    
+    def cancel(self):
+        logger.warning("Cancellation requested")
+        self.is_running = False
                     
                     
         
