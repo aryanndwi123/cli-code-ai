@@ -1,6 +1,5 @@
-import hashlib
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
 from passlib.context import CryptContext
@@ -11,6 +10,34 @@ from ..core.config import settings
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def validate_password_strength(password: str) -> tuple[bool, str]:
+    """
+    Validate password strength
+    Returns: (is_valid, error_message)
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    
+    if len(password) > 128:
+        return False, "Password must be less than 128 characters long"
+    
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
+    
+    if not (has_upper and has_lower):
+        return False, "Password must contain both uppercase and lowercase letters"
+    
+    if not has_digit:
+        return False, "Password must contain at least one digit"
+    
+    if not has_special:
+        return False, "Password must contain at least one special character"
+    
+    return True, ""
 
 
 class AuthService:
@@ -37,9 +64,9 @@ class AuthService:
         """Create JWT access token"""
         to_encode = data.copy()
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes)
+            expire = datetime.now(timezone.utc) + timedelta(minutes=self.access_token_expire_minutes)
 
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
@@ -49,10 +76,15 @@ class AuthService:
         """Verify JWT token"""
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
-            user_id: int = payload.get("sub")
+            user_id_str = payload.get("sub")
             email: str = payload.get("email")
 
-            if user_id is None:
+            if user_id_str is None:
+                return None
+
+            try:
+                user_id = int(user_id_str)
+            except (ValueError, TypeError):
                 return None
 
             return TokenData(user_id=user_id, email=email)
@@ -69,17 +101,22 @@ class AuthService:
 
     def create_user(self, db: Session, user: UserCreate) -> User:
         """Create new user"""
-        # Check if user already exists
+        is_valid, error_msg = validate_password_strength(user.password)
+        if not is_valid:
+            raise ValueError(error_msg)
+        
         if self.get_user_by_email(db, user.email):
             raise ValueError("User with this email already exists")
+        
+        if user.username:
+            existing_user = db.query(User).filter(User.username == user.username).first()
+            if existing_user:
+                raise ValueError("Username already taken")
 
-        # Hash password
         hashed_password = self.get_password_hash(user.password)
 
-        # Generate API key
         api_key = self.generate_api_key()
 
-        # Create user
         db_user = User(
             email=user.email,
             username=user.username,
@@ -100,8 +137,7 @@ class AuthService:
         if not self.verify_password(password, user.hashed_password):
             return None
 
-        # Update last login
-        user.last_login = datetime.utcnow()
+        user.last_login = datetime.now(timezone.utc)
         db.commit()
         return user
 

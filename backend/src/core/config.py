@@ -1,6 +1,8 @@
 import os
+import secrets
 from pydantic_settings import BaseSettings
 from typing import Optional
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -10,8 +12,19 @@ class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./klix_code.db")
 
     # Security
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+    SECRET_KEY: str = Field(
+        default_factory=lambda: secrets.token_urlsafe(32),
+        description="Secret key for JWT tokens. Should be set via environment variable in production."
+    )
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
+    
+    @field_validator("SECRET_KEY", mode="before")
+    @classmethod
+    def validate_secret_key(cls, v):
+        """Validate SECRET_KEY from environment or generate secure default"""
+        if not v or v == "your-secret-key-change-in-production":
+            return secrets.token_urlsafe(32)
+        return v
 
     # API
     API_HOST: str = os.getenv("API_HOST", "localhost")

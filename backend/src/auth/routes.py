@@ -18,18 +18,20 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
         db_user = auth_service.create_user(db, user)
         return UserResponse.model_validate(db_user)
     except ValueError as e:
+        error_msg = str(e)
+        if "Password" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_msg
+            )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=str(e)
+            detail="An account with this email or username already exists"
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
-                "message": "Failed to create user",
-                "error": str(e),
-                "type": type(e).__name__
-            }
+            detail="Failed to create user. Please try again later."
         )
 
 
@@ -50,7 +52,6 @@ async def signin(user_login: UserLogin, db: Session = Depends(get_db)):
             detail="Account is deactivated"
         )
 
-    # Create access token
     access_token = auth_service.create_access_token(
         data={"sub": str(user.id), "email": user.email}
     )
@@ -65,7 +66,6 @@ async def signin(user_login: UserLogin, db: Session = Depends(get_db)):
 @router.post("/logout")
 async def logout(current_user: UserResponse = Depends(get_current_user)):
     """Logout user (client should discard token)"""
-    # In a stateless JWT system, logout is handled client-side
     return {"message": "Successfully logged out"}
 
 

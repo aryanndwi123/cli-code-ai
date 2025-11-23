@@ -37,7 +37,7 @@ async def get_current_user(
             detail="Account is deactivated"
         )
 
-    return UserResponse.from_orm(user)
+    return UserResponse.model_validate(user)
 
 
 async def get_current_user_optional(
@@ -63,4 +63,4 @@ async def get_user_by_api_key(
             detail="Invalid API key"
         )
 
-    return UserResponse.from_orm(user)
+    return UserResponse.model_validate(user)
