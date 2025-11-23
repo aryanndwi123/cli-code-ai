@@ -17,6 +17,7 @@ from exceptions import (
 )
 
 import time
+import json
 
 
 
@@ -258,6 +259,129 @@ class Orchestrator:
             results.append(tool_result)
             
         return results
+    
+    
+    def _extract_tool_calls(self,response: Message) -> List[Dict[str,Any]]:
+        tool_calls = []
+        
+        for block in response.content:
+            if isinstance(block, ToolUseBlock):
+                tool_calls.append({
+                    "id": block.id,
+                    "name":block.name,
+                    "input":block.input
+                })
+                
+        return tool_calls
+    
+    def _format_tool_result(self, result: Dict[str,Any]) -> str:
+        if "content" in result:
+            content = result["content"]
+            
+            max_length = 10000
+            if len(content) > max_length:
+                content = content[:max_length] + f"\n\n... (truncated, {len(content)} total chars)"
+                
+            return content
+        
+        return json.dumps(result,indent=2)
+    
+    def _build_api_message(self) -> List[Dict[str,Any]]:
+        return self.messages
+    
+    def _add_user_message(self,content:str):
+        self.messages.append({
+            "role": "user",
+            "content":content
+        })
+        
+    def _add_assistant_message(self,response:Message):
+        content_blocks = []
+        
+        for block in response.content:
+            if isinstance(block,TextBlock):
+                content_blocks.append({
+                    "type":"text",
+                    "text": block.text
+                })
+            elif isinstance(block,TextBlock):
+                content_blocks.append({
+                    "type":"tool_use",
+                    "id": block.id,
+                    "name": block.name,
+                    "input": block.input
+                })
+                
+        self.message.append({
+            "role":"assistant",
+            "content":content_blocks
+        })
+        
+    
+    def _add_tool_results(self,tool_results: List[Dict[str,Any]]):
+        self.messages.append({
+            "role":"user",
+            "content":tool_results
+        })
+        
+    def _build_system_prompts(self) -> str:
+        
+        return f"""You are an exper coding assistant with access to tools that can read, write, and execute code in the user's workspace Your workspace is: {self.config.workspace_path}
+
+# Your Role
+You help users with coding tasks by:
+- Reading and understanding their codebase
+- Writing and editing code files
+- Running commands and tests
+- Iterating based on results
+
+# Guidelines
+1. **Explore before acting**: Read files and understand the codebase before making changes
+2. **Be surgical**: Make targeted edits rather than rewriting entire files
+3. **Test your work**: Run commands to verify your changes work
+4. **Explain clearly**: Tell the user what you're doing and why
+5. **Handle errors**: If something fails, read the error, understand it, and fix it
+6. **Be efficient**: Use tools wisely - don't read files you don't need
+
+# Available Tools
+You have access to several tools - use them to accomplish the user's task.
+When you're done with the task, simply respond without calling any more tools.
+
+# Important
+- Always validate your changes work before completing
+- If you encounter errors, debug them - don't give up
+- Ask for clarification if the task is ambiguous
+- Prefer small, incremental changes over large rewrites
+"""
+    def _extract_final_message(self,response:Message) ->str:
+        text_parts = []
+        
+        for block in response.content:
+            if isinstance(block,TextBlock):
+                text_parts.append(block.text)
+                
+        
+        return "\n\n".join(text_parts)
+    
+    def _create_success_result(self,response:Message) -> ExecutionResult:
+        execution_time = (datetime.now() - self.start_time).total_seconds()
+        
+        return ExecutionResult(
+            success=True,
+            final_message=self._extract_final_message(response),
+            iterations_used=self.iteration_count,
+            tools_called=self.tools_called,
+            files_modified=list(set(self.files_modified)),
+            errors=self.errors,
+            execution_time=execution_time,
+            metadata={
+                "model":self.config.model,
+                "workspace": str(self.config.workspace_path)
+                
+            }
+            
+            
+        )   
     
                     
                     
