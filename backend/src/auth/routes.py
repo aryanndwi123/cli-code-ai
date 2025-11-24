@@ -112,3 +112,19 @@ async def deactivate_account(
         )
 
     return {"message": "Account deactivated successfully"}
+
+
+@router.delete("/delete")
+async def delete_account(
+    current_user: UserResponse = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    success = auth_service.delete_user(db, current_user.id)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    return {"message": "Account deleted successfully"}

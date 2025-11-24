@@ -9,7 +9,7 @@ from ..core.database import get_db
 from ..core.config import settings
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def validate_password_strength(password: str) -> tuple[bool, str]:
@@ -163,6 +163,15 @@ class AuthService:
             return False
 
         user.is_active = False
+        db.commit()
+        return True
+
+    def delete_user(self, db: Session, user_id: int) -> bool:
+        user = self.get_user_by_id(db, user_id)
+        if not user:
+            return False
+
+        db.delete(user)
         db.commit()
         return True
 
