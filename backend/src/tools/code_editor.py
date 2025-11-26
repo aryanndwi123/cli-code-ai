@@ -175,3 +175,74 @@ class ListDirectoryTool(BaseTool):
                 "success": False
             }
             
+class EditFileTool(BaseTool):
+    def get_schema(self) -> Dict[str,Any]:
+        return {
+            "name": "edit_file",
+            "description": "Edit a file by searching for text and replacing it",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Relative path to the file"
+                    },
+                    "search": {
+                        "type": "string",
+                        "description": "Exact text to search for (must be unique in file)"
+                    },
+                    "replace": {
+                        "type": "string",
+                        "description": "Text to replace with"
+                    }
+                },
+                "required": ["path", "search", "replace"]
+            }
+        }
+        
+    def execute(self, parameters:Dict[str,Any]) -> Dict[str,Any]:
+        path_str = parameters["path"]
+        search_text = parameters["search"]
+        replace_text = parameters["replace"]
+        
+        try:
+            file_path = self.validate_path(path_str)
+            
+            if not file_path.exists():
+                return{
+                    "content": f"Error: File not found: {path_str}",
+                    "success": False
+                }
+                
+            content = file_path.read_text(encoding='utf-8')
+            
+            if search_text not in content:
+                return {
+                    "content": f"Error: Search text not found in {path_str}",
+                    "success": False
+                }
+                
+            count = content.count(search_text)
+            if count >1:
+                return {
+                    "content": f"Error: Search text appears {count} times in file. Must be unique.",
+                    "success": False
+                }
+                
+            new_content = content.replace(search_text,replace_text)
+            
+            file_path.write_text(new_content, encoding='utf-8')
+            
+            return {
+                "content": f"Successfully edited {path_str}",
+                "files_modified": [path_str],
+                "success": True
+            }
+            
+        except Exception as e:
+            logger.error(f"Error editing file {path_str}: {e}")
+            return {
+                "content": f"Error editing file: {str(e)}",
+                "success": False
+            }
+            
