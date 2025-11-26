@@ -30,4 +30,25 @@ class LLMResponse:
                 tools.append(block)
                 
         return tools
+
+class BaseLLMClient(ABC):
+    def __init__(self,api_key:str,model:str):
+        self.api_key = api_key
+        self.model = model
+        
+    @abstractmethod
+    def create_message(
+        self,
+        message:List[Dict[str,Any]],
+        system: str,
+        tools:List[Dict[str,Any]],
+        max_token: int,
+        temperature: float
+    ) -> LLMResponse:
+        
+        pass
     
+    @abstractmethod
+    def convert_tools_to_provider_format(self, tools:List[Dict[str,Any]]) -> Any:
+        pass
+        
